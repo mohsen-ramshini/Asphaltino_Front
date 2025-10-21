@@ -61,7 +61,7 @@ function Dashboard() {
   const alertsChange = criticalAlerts > 3 ? 10 : -5;
 
   // const isLoading = isLoadingDevices  || isLoadingAlerts || isLoadingStats;
-  const isLoading = isLoadingDevices
+  const isLoading = false
   
   const kpiCards = [
     {

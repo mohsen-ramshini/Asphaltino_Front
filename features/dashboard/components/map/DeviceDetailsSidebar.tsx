@@ -80,15 +80,15 @@ const DeviceDetailsSidebar: React.FC<DeviceDetailsSidebarProps> = ({
                 AsphaltTemperature: 1,
                 Icing: false,
               });
-            }, 15000000);
+            }, 15000);
             return () => clearTimeout(t5);
-          }, 5000000);
+          }, 5000);
           return () => clearTimeout(t4);
-        }, 5000000);
+        }, 5000);
         return () => clearTimeout(t3);
-      }, 15000000);
+      }, 15000);
       return () => clearTimeout(t2);
-    }, 35000000);
+    }, 35000);
 
     return () => {
       clearTimeout(t1);
