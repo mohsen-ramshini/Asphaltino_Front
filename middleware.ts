@@ -11,14 +11,14 @@ export function middleware(request: NextRequest) {
   }
 
   // اگر در صفحه dashboard هستیم و توکن نداریم → بفرست login
-  if (pathname.startsWith('/dashboard') && !accessToken) {
-    return NextResponse.redirect(new URL('/auth/sign-in', request.url));
-  }
+  // if (pathname.startsWith('/dashboard') && !accessToken) {
+  //   return NextResponse.redirect(new URL('/auth/sign-in', request.url));
+  // }
 
   // اگر در صفحه اصلی هستیم و توکن داریم → بفرست dashboard
-  if (pathname === '/' && accessToken) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
+  // if (pathname === '/' && accessToken) {
+  //   return NextResponse.redirect(new URL('/dashboard', request.url));
+  // }
 
   return NextResponse.next();
 }
