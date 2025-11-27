@@ -34,32 +34,35 @@ function Sidenav({ color = "#1890ff", currentPage, collapsed = false }: SidenavP
       </div>
 
       {/* Menu */}
-      <Menu
-        theme="light"
-        mode="inline"
-        selectedKeys={[currentPage]}
-        className="flex-1 border-none mt-4"
-        inlineCollapsed={collapsed}
-        items={menuItems.map(item => ({
-          key: item.key,
-          icon: (
-            <span
-              className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200`}
-              style={{
-                background: currentPage === item.key ? "rgba(24,144,255,0.2)" : "rgba(24,144,255,0.05)",
-                color: currentPage === item.key ? color : "#666",
-                fontSize: "18px",
-              }}
-            >
-              {item.icon}
-            </span>
-          ),
-          label: item.label,
-          style: collapsed
-            ? { paddingLeft: 15, paddingRight: 0 }
-            : {},
-        }))}
-      />
+        <Menu
+          theme="light"
+          mode="inline"
+          selectedKeys={[currentPage]}
+          className="flex-1 border-none mt-4"
+          inlineCollapsed={collapsed}
+          onClick={({ key }) => {
+            const item = menuItems.find(m => m.key === key);
+            if (item?.href) router.push(item.href);
+          }}
+          items={menuItems.map(item => ({
+            key: item.key,
+            icon: (
+              <span
+                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200`}
+                style={{
+                  background: currentPage === item.key ? "rgba(24,144,255,0.2)" : "rgba(24,144,255,0.05)",
+                  color: currentPage === item.key ? color : "#666",
+                  fontSize: "18px",
+                }}
+              >
+                {item.icon}
+              </span>
+            ),
+            label: item.label,
+            style: collapsed ? { paddingLeft: 15, paddingRight: 0 } : {},
+          }))}
+        />
+
 
 
       {/* Footer */}

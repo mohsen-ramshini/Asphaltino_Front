@@ -23,6 +23,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     if (pathname === "/dashboard") return "dashboard";
     if (pathname.startsWith("/dashboard/devices")) return "devices";
     if (pathname.startsWith("/dashboard/profile")) return "profile";
+    if (pathname.startsWith("/dashboard/map")) return "map";
+    if (pathname.startsWith("/dashboard/record")) return "record";
     return "dashboard";
   };
 
@@ -116,8 +118,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             borderRadius: borderRadiusLG,
           }}
         >
-          map
-          {/* {children} */}
+          {children}
         </Content>
       </Layout>
     </Layout>

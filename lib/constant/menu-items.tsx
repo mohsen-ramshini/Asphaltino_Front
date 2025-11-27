@@ -12,7 +12,7 @@ export const menuItems = [
         key: "dashboard",
         icon: <AreaChartOutlined />,
         label: "Dashboard",
-        href: "/dashboard/dashboard",
+        href: "/dashboard",
     },
     {
         key: "map",
