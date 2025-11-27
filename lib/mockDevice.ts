@@ -1,27 +1,50 @@
 export const mockDeviceData = [
-{
-  id: 1,
-  name: "asphalt sensors",
-  uuid: "abc123-xyz-789",
-  location: {
-    address: "Ardabil Airport, Ardabil, Iran",
-    latitude: 38.3257,
-    longitude: 48.4244
+  {
+    id: 1,
+    name: "asphalt sensor - north",
+    uuid: "f1c2e3a4-bb11-4d9d-9aa2-1122aa55cc77",
+    location: {
+      address: "Helsinki Region, Finland",
+      latitude: 60.24025,
+      longitude: 25.04911
+    },
+    api_key: "APIKEY-NS-001",
+    sub_id: "SUB-NS-001",
+    status: "offline",
+    count: 90,
+    avg_wind_speed: 13.5,
+    max_wind_speed: 22.0,
+    min_wind_speed: 5.0,
+    avg_humidity: 85,
+    avg_air_temperature: -2.0,
+    avg_asphalt_temperature: null,
+    icing_occurrences: null,
+    first_data_timestamp: "2024-12-01T00:00:00Z",
+    last_data_timestamp: "2025-02-28T23:59:59Z"
   },
-  api_key: "APIKEY123456789",
-  sub_id: "SUB-001",
-  status: "offline",
-  count: 120,
-  avg_wind_speed: 11.6,
-  max_wind_speed: 13.8,
-  min_wind_speed: 7.2,
-  avg_humidity: 74,
-  avg_air_temperature: 2.9,
-  avg_asphalt_temperature: 2,
-  icing_occurrences: 5,
-  first_data_timestamp: "2025-07-01T08:00:00Z",
-  last_data_timestamp: "2025-02-28T23:59:59Z"
-}
+  {
+    id: 2,
+    name: "asphalt sensor - west",
+    uuid: "aa33bc77-2211-44ff-9ce0-d7722ee901ab",
+    location: {
+      address: "Espoo/Helsinki Region, Finland",
+      latitude: 60.16203,
+      longitude: 24.86899
+    },
+    api_key: "APIKEY-WS-002",
+    sub_id: "SUB-WS-002",
+    status: "offline",
+    count: 88,
+    avg_wind_speed: 13.5,
+    max_wind_speed: 22.0,
+    min_wind_speed: 5.0,
+    avg_humidity: 85,
+    avg_air_temperature: -2.0,
+    avg_asphalt_temperature: null,
+    icing_occurrences: null,
+    first_data_timestamp: "2024-12-01T00:00:00Z",
+    last_data_timestamp: "2025-02-28T23:59:59Z"
+  }
 
   // {
   //   id: 2,
