@@ -1,12 +1,18 @@
 import { Menu } from "antd";
 import { LogoutOutlined } from "@ant-design/icons"
-import Link from "next/link";
-import { menuItems } from "@/lib/constant/menu-items"
 
 import { useRouter } from "next/navigation";
+
+import { menuItems } from "@/lib/constant/menu-items"
 import { useLogout } from "@/features/auth/api";
 
-function Sidenav({ color = "#1890ff", currentPage, collapsed = false }) {
+interface SidenavProps {
+  color?: string;
+  currentPage: string;
+  collapsed?: boolean;
+}
+
+function Sidenav({ color = "#1890ff", currentPage, collapsed = false }: SidenavProps) {
   const router = useRouter();
   const logout = useLogout();
 
@@ -24,9 +30,6 @@ function Sidenav({ color = "#1890ff", currentPage, collapsed = false }) {
     <div className="h-full flex flex-col bg-white">
       {/* Brand / Logo */}
       <div className={`h-16 flex items-center justify-center border-b border-gray-100 px-2`}>
-        {/* <span className={`text-xl font-bold text-blue-600 transition-all duration-200 ${collapsed ? 'hidden' : 'block'}`}>
-          IntAsphalt
-        </span> */}
         Logo
       </div>
 
@@ -51,9 +54,9 @@ function Sidenav({ color = "#1890ff", currentPage, collapsed = false }) {
               {item.icon}
             </span>
           ),
-          label: item.label, // همیشه مقدار بدیم
+          label: item.label,
           style: collapsed
-            ? { paddingLeft: 15, paddingRight: 0 } // حذف فاصله اضافی وقتی collapsed
+            ? { paddingLeft: 15, paddingRight: 0 }
             : {},
         }))}
       />

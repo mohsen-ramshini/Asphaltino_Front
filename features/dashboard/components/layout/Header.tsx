@@ -1,69 +1,72 @@
-import { useState, useEffect } from "react";
-import {
-  Row,
-  Col,
-  Breadcrumb,
-  Typography,
-  Button,
-} from "antd";
+import { useEffect } from "react";
+import { Row, Col, Breadcrumb, Typography, Button, Tooltip } from "antd";
 import {
   MenuOutlined,
-  ClockCircleOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  BellOutlined,
+  GlobalOutlined,
+  BulbOutlined,
+  MoonOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 
-function Header({
-  name,
-  subName,
-  onPress, // این برای Drawer موبایل
-  toggleCollapsed, // این برای باز و بسته کردن Sidebar دسکتاپ
-  collapsed, // وضعیت Sidebar
-  handleSidenavColor,
-  handleSidenavType,
-  handleFixedNavbar,
-}) {
-  const { Title, Text } = Typography;
+interface HeaderProps {
+  name: string;
+  toggleCollapsed: () => void;
+  collapsed: boolean;
+  isDarkMode?: boolean;
+}
+
+function Header({ name, toggleCollapsed, collapsed, isDarkMode = false }: HeaderProps) {
+
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       window.scrollTo(0, 0);
     }
   }, []);
 
   return (
-    <>
-      <Row gutter={[24, 0]} className="w-full items-center">
-        <Col span={24} md={6} className="flex items-center gap-2">
-          {/* دکمه toggle Sidebar */}
-          <Button
-            type="text"
-            icon={<MenuOutlined />}
-            onClick={toggleCollapsed}
-            className="mr-2"
-          />
-          <Breadcrumb
-            items={[
-              {
-                title: <Link href="/" className="text-blue-600 hover:text-blue-800">Pages</Link>,
-              },
-              {
-                title: (
-                  <span className="capitalize text-gray-600">
-                    {name.replace("/", "")}
-                  </span>
-                ),
-              },
-            ]}
-          />
-          <div className="mt-2">
-            <span className="text-xl font-semibold text-gray-800 capitalize">
-              {subName.replace("/", "")}
-            </span>
-          </div>
-        </Col>
-        {/* بخش سمت راست می‌تواند notification، search و دکمه Drawer موبایل باشد */}
-      </Row>
-    </>
+    <Row
+      className="w-full items-center justify-between px-4 py-2 bg-white shadow-sm"
+    >
+      <Col className="flex items-center gap-3">
+        <Button
+          type="text"
+          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          onClick={toggleCollapsed}
+          className="text-xl"
+        />
+
+        <Breadcrumb
+          items={[
+            {
+              title: <Link href="/" className="text-blue-600 hover:text-blue-800">Pages</Link>,
+            },
+            {
+              title: <span className="capitalize text-gray-600">{name.replace("/", "")}</span>,
+            },
+          ]}
+        />
+
+      </Col>
+
+
+      <Col className="flex items-center gap-4">
+        <Tooltip title="Notifications">
+          <Button type="text" icon={<BellOutlined />} className="text-xl" />
+        </Tooltip>
+
+        <Tooltip title="Language">
+          <Button type="text" icon={<GlobalOutlined />} className="text-xl" />
+        </Tooltip>
+
+        <Tooltip title="Theme">
+          <Button type="text" icon={isDarkMode ? <MoonOutlined /> : <BulbOutlined />} className="text-xl" />
+        </Tooltip>
+      </Col>
+    </Row>
   );
 }
 
