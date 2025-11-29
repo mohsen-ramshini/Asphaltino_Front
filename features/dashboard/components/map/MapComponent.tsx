@@ -62,7 +62,7 @@ export default function MapWithSidebar() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [48.2964, 38.2498], // Tehran, Iran
+      center: [24.96333, 60.31722], // Tehran, Iran
       zoom: 12,
       pitch: 60,
       bearing: -20,
@@ -276,10 +276,10 @@ export default function MapWithSidebar() {
     let coords: [number, number];
     if (feature.geometry.type === 'Point') {
       const rawCoords = (feature.geometry as Point).coordinates;
-      coords = [rawCoords[0] ?? 51.3890, rawCoords[1] ?? 35.6892];
+      coords = [rawCoords[0] ?? 24.96333, rawCoords[1] ?? 60.31722];
     } else {
       // Fallback to Tehran coordinates if not a Point
-      coords = [51.3890, 35.6892];
+      coords = [24.96333, 60.31722];
     }
     const title = feature.properties?.title ?? '';
 
@@ -333,7 +333,7 @@ export default function MapWithSidebar() {
     setDetailsSidebarOpen(false);
     
     map.current.flyTo({
-      center: [48.2964, 38.2498], // اردبیل
+      center: [24.96333, 60.31722], // اردبیل
       zoom: 12,
       pitch: 60,
       bearing: -20,

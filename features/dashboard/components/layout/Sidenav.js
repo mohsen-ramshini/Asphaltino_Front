@@ -1,3 +1,4 @@
+"use client"
 import { Menu } from "antd";
 import Link from "next/link";
 import { 

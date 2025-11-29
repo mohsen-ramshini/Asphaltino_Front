@@ -95,8 +95,8 @@ export default function WeatherComponent (): JSX.Element {
   const [mainImg, setMainImg] = useState(null as unknown as JSX.Element)
   const [city, setCity] = useState('' as unknown as string)
   // Use hardcoded coordinates for Tehran as default
-  const [latitude] = useState('38.3257')
-  const [longitude] = useState('48.4244')
+  const [latitude] = useState('60.31722')
+  const [longitude] = useState('24.96333')
   const [temperature, setTemperature] = useState('')
   const [description, setDescription] = useState('')
   const [feelsLike, setFeelsLike] = useState('')
@@ -134,7 +134,7 @@ export default function WeatherComponent (): JSX.Element {
     
     if (typeof window !== 'undefined') {
       const savedCity = localStorage.getItem('city')
-      setCity(savedCity || 'Tehran')
+      setCity(savedCity || 'Helsinki')
       
       // Auto-load weather data on component mount
       if (!showComponents) {
@@ -153,7 +153,7 @@ export default function WeatherComponent (): JSX.Element {
     }
   }, [metaTheme])
 
-  // Add function to load default Tehran data
+  // Add function to load default Helsinki data
   const loadDefaultWeatherData = async () => {
     setLoading(true)
     setError('')
@@ -165,7 +165,7 @@ export default function WeatherComponent (): JSX.Element {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          city: 'Tehran'
+          city: 'Helsinki'
         })
       })
       
@@ -467,15 +467,15 @@ export default function WeatherComponent (): JSX.Element {
           return {
             name: forecastTime,
             description: item.weather[0].description,
-            temp: +item.temp.toFixed(1),
+            temp: +item.temp?.toFixed(1),
             humidity: item.humidity,
             pressure: item.pressure,
-            wind: +(item.wind_speed * 3.6).toFixed(0),
+            wind: +(item.wind_speed * 3.6)?.toFixed(0),
             windDeg: item.wind_deg,
             weather: item.weather[0].id,
-            precipitation: item.rain ? +item.rain['1h'].toFixed(2) : 0,
-            rain: item.pop ? +(item.pop * 100).toFixed(0) : 0,
-            uv: +item.uvi.toFixed(0),
+            precipitation: item.rain ? +item.rain['1h']?.toFixed(2) : 0,
+            rain: item.pop ? +(item.pop * 100)?.toFixed(0) : 0,
+            uv: +item.uvi?.toFixed(0),
             sunDownH: sunDown,
             sunUpH: sunUp
           }
@@ -504,7 +504,7 @@ export default function WeatherComponent (): JSX.Element {
     const forecastsDaily = daily.slice(2)
     const temperaturesDailyMax = forecastsDaily.map((forecast: WeatherForecast) => Math.floor(forecast.temp.max))
     const temperaturesDailyMin = forecastsDaily.map((forecast: WeatherForecast) => Math.floor(forecast.temp.min))
-    const precipitationDaily = forecastsDaily.map((forecast: WeatherForecast) => +(forecast.pop * 100).toFixed(0))
+    const precipitationDaily = forecastsDaily.map((forecast: WeatherForecast) => +(forecast.pop * 100)?.toFixed(0))
     const weatherIdsDaily = forecastsDaily.map((forecast: WeatherForecast) => forecast.weather[0].id)
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
     const dates = forecastsDaily.map((forecast: WeatherForecast) => new Date(forecast.dt * 1000))
@@ -601,16 +601,16 @@ export default function WeatherComponent (): JSX.Element {
     setSunset(sunDown)
     setTime(localTime)
     setCity(name)
-    setTemperature(`${+current.temp.toFixed(1)}°C`)
+    setTemperature(`${+current.temp?.toFixed(1)}°C`)
     setDescription(current.weather[0].description)
-    setFeelsLike(`${+current.feels_like.toFixed(0)}°C`)
+    setFeelsLike(`${+current.feels_like?.toFixed(0)}°C`)
     setHumidity(`${current.humidity}%`)
-    setWind(`${+(3.6 * current.wind_speed).toFixed(0)}km/h`)
+    setWind(`${+(3.6 * current.wind_speed)?.toFixed(0)}km/h`)
     setWindDirection(windDeg + 180)
     setPressure(`${current.pressure}hPa`)
-    setUv(+current.uvi.toFixed(0))
-    setCityLatitude(data.lat)
-    setCityLongitude(data.lon)
+    setUv(+current.uvi?.toFixed(0))
+    setCityLatitude("60.31722")
+    setCityLongitude("24.96333")
     setMainImg(<Image
       src={imgSrc}
       className="mainImg"
@@ -681,8 +681,11 @@ export default function WeatherComponent (): JSX.Element {
   const geolocation = async () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async (position) => {
-        const { latitude } = position.coords
-        const { longitude } = position.coords
+        // const { latitude } = position.coords
+        // const { longitude } = position.coords
+
+        const  latitude  = 60.31722
+        const  longitude  = 24.96333
         
         setLoading(true);
         setError('');
@@ -724,47 +727,47 @@ export default function WeatherComponent (): JSX.Element {
   const handleUnity = () => {
     if (temperature?.endsWith('C')) {
       const temperatureInCelsius = +(temperature.slice(0, -2))
-      const temperatureInFahrenheit = (temperatureInCelsius * 1.8 + 32).toFixed(1)
+      const temperatureInFahrenheit = (temperatureInCelsius * 1.8 + 32)?.toFixed(1)
       setTemperature(`${temperatureInFahrenheit}°F`)
       const feelsLikeInCelsius = +(feelsLike.slice(0, -2))
-      const feelsLikeInFahrenheit = (feelsLikeInCelsius * 1.8 + 32).toFixed(0)
+      const feelsLikeInFahrenheit = (feelsLikeInCelsius * 1.8 + 32)?.toFixed(0)
       setFeelsLike(`${feelsLikeInFahrenheit}°F`)
       const windInKilometersPerHour = +(wind.slice(0, -4))
-      const windInMilesPerHour = (windInKilometersPerHour / 1.609).toFixed(0)
+      const windInMilesPerHour = (windInKilometersPerHour / 1.609)?.toFixed(0)
       setWind(`${windInMilesPerHour}mph`)
-      setTempMinDays(tempMinDays.map((temp) => `${((temp.slice(0, -2)) * 1.8 + 32).toFixed(0)}°F`))
-      setTempMaxDays(tempMaxDays.map((temp) => `${((temp.slice(0, -2)) * 1.8 + 32).toFixed(0)}°F`))
+      setTempMinDays(tempMinDays.map((temp) => `${((temp.slice(0, -2)) * 1.8 + 32)?.toFixed(0)}°F`))
+      setTempMaxDays(tempMaxDays.map((temp) => `${((temp.slice(0, -2)) * 1.8 + 32)?.toFixed(0)}°F`))
       setDataChart1(dataChart1?.map((item) => ({
         ...item,
-        temp: +(item.temp * 1.8 + 32).toFixed(1),
-        wind: +(item.wind / 1.609).toFixed(0)
+        temp: +(item.temp * 1.8 + 32)?.toFixed(1),
+        wind: +(item.wind / 1.609)?.toFixed(0)
       })))
       setDataChart2(dataChart2?.map((item) => ({
         ...item,
-        temp: +(item.temp * 1.8 + 32).toFixed(1),
-        wind: +(item.wind / 1.609).toFixed(0)
+        temp: +(item.temp * 1.8 + 32)?.toFixed(1),
+        wind: +(item.wind / 1.609)?.toFixed(0)
       })))
     } else {
       const temperatureInFahrenheit = +(temperature.slice(0, -2))
-      const temperatureInCelsius = ((temperatureInFahrenheit - 32) / 1.8).toFixed(1)
+      const temperatureInCelsius = ((temperatureInFahrenheit - 32) / 1.8)?.toFixed(1)
       setTemperature(`${temperatureInCelsius}°C`)
       const feelsLikeInFahrenheit = +(feelsLike.slice(0, -2))
-      const feelsLikeInCelsius = ((feelsLikeInFahrenheit - 32) / 1.8).toFixed(0)
+      const feelsLikeInCelsius = ((feelsLikeInFahrenheit - 32) / 1.8)?.toFixed(0)
       setFeelsLike(`${feelsLikeInCelsius}°C`)
       const windInMilesPerHour = +(wind.slice(0, -3))
-      const windInKilometersPerHour = (windInMilesPerHour * 1.609).toFixed(0)
+      const windInKilometersPerHour = (windInMilesPerHour * 1.609)?.toFixed(0)
       setWind(`${windInKilometersPerHour}km/h`)
-      setTempMinDays(tempMinDays.map((temp) => `${(((temp.slice(0, -2)) - 32) / 1.8).toFixed(0)}°C`))
-      setTempMaxDays(tempMaxDays.map((temp) => `${(((temp.slice(0, -2)) - 32) / 1.8).toFixed(0)}°C`))
+      setTempMinDays(tempMinDays.map((temp) => `${(((temp.slice(0, -2)) - 32) / 1.8)?.toFixed(0)}°C`))
+      setTempMaxDays(tempMaxDays.map((temp) => `${(((temp.slice(0, -2)) - 32) / 1.8)?.toFixed(0)}°C`))
       setDataChart1(dataChart1?.map((item) => ({
         ...item,
-        temp: +((item.temp - 32) / 1.8).toFixed(1),
-        wind: +(item.wind * 1.609).toFixed(0)
+        temp: +((item.temp - 32) / 1.8)?.toFixed(1),
+        wind: +(item.wind * 1.609)?.toFixed(0)
       })))
       setDataChart2(dataChart2?.map((item) => ({
         ...item,
-        temp: +((item.temp - 32) / 1.8).toFixed(1),
-        wind: +(item.wind * 1.609).toFixed(0)
+        temp: +((item.temp - 32) / 1.8)?.toFixed(1),
+        wind: +(item.wind * 1.609)?.toFixed(0)
       })))
     }
   }
@@ -781,7 +784,7 @@ export default function WeatherComponent (): JSX.Element {
         {showComponents && (
           <div className="flex justify-between items-center">
             <Text className="text-gray-600 text-base">
-              {time} | ARDABIL
+              {time} | Helsinki–Vantaa
             </Text>
             <Button
               type="text"
@@ -808,7 +811,7 @@ export default function WeatherComponent (): JSX.Element {
           <Card className="mb-4 bg-gray-50 border border-gray-200">
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
-                placeholder="Enter city (e.g. Tehran)"
+                placeholder="Enter city "
                 size="large"
                 prefix={<SearchOutlined className="text-gray-400" />}
                 value={city}

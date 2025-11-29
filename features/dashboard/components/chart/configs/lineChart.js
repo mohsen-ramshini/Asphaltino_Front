@@ -2,15 +2,16 @@ const lineChart = {
   series: [
     {
       name: "Asphalt Temperature",
-      data: [1, 2, 0, -1, 2, 3, 4, 2, 1],
-      offsetY: 0,
+      data: [1, 0, -1, -3, -2, -1, 0, 1, 2],
+      offsetY: 0
     },
     {
       name: "Air Temperature",
-      data: [2, 3, 1, 0, 3, 4, 5, 3, 2],
-      offsetY: 0,
+      data: [0, -1, -3, -5, -4, -3, -2, -1, 1],
+      offsetY: 0
     },
   ],
+
 
   options: {
     chart: {

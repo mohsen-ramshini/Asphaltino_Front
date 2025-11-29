@@ -2,10 +2,11 @@ const eChart = {
   series: [
     {
       name: "Black Ice Probability",
-      data: [75, 70, 55, 40, 25, 10, 15, 35],
-      color: "#60a5fa",
+      data: [80, 75, 65, 50, 35, 20, 25, 45],
+      color: "#60a5fa"
     },
   ],
+
 
   options: {
     chart: {

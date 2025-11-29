@@ -118,36 +118,37 @@ function Dashboard() {
 
 const timelineList = [
   {
-    title: "Icing detected at Ardabil Airport sensor",
-    time: "10 Bahman 1403, 7:20 AM",
+    title: "Icing detected on Helsinki city asphalt sensor",
+    time: "29 January 2025, 7:20 AM",
     color: "red",
   },
   {
-    title: "Low battery detected at Ardabil Airport sensor",
-    time: "9 Bahman 1403, 12:20 PM",
+    title: "Low battery detected on Helsinki city asphalt sensor",
+    time: "28 January 2025, 12:20 PM",
     color: "orange",
   },
   {
-    title: "Temperature below threshold at Ardabil Airport sensor",
-    time: "9 Bahman 1403, 3:10 PM",
+    title: "Temperature below threshold on Helsinki city asphalt sensor",
+    time: "28 January 2025, 3:10 PM",
     color: "red",
   },
   {
-    title: "Maintenance completed on Ardabil Airport sensor",
-    time: "8 Bahman 1403, 2:45 PM",
+    title: "Maintenance completed on Helsinki city asphalt sensor",
+    time: "27 January 2025, 2:45 PM",
     color: "green",
   },
   {
-    title: "New calibration applied to Ardabil Airport sensor",
-    time: "7 Bahman 1403, 1:30 PM",
+    title: "New calibration applied to Helsinki city asphalt sensor",
+    time: "26 January 2025, 1:30 PM",
     color: "blue",
   },
   {
-    title: "System update completed for Ardabil Airport sensor",
-    time: "5 Bahman 1403, 3:30 PM",
+    title: "System update completed for Helsinki city asphalt sensor",
+    time: "24 January 2025, 3:30 PM",
     color: "gray",
   },
 ];
+
 
 
   return (
