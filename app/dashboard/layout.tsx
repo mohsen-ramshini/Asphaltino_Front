@@ -3,9 +3,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <section className="dashboard-layout">
-      {children}
-    </section>
-  );
+  return <section>{children}</section>;
 }

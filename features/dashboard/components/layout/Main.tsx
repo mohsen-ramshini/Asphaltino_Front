@@ -84,7 +84,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             transition: "all 0.2s",
           }}
         >
-          <Sidenav color="#1890ff" currentPage={currentPage} collapsed={collapsed} />
+          <Sidenav
+            color="#1890ff"
+            currentPage={currentPage}
+            collapsed={collapsed}
+          />
         </Sider>
       )}
 
@@ -99,7 +103,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         }}
       >
         {/* Header */}
-        <AntHeader style={{ padding: 0, background: colorBgContainer, width: '100%' }}>
+        <AntHeader
+          style={{ padding: 0, background: colorBgContainer, width: "100%" }}
+        >
           <Header
             toggleCollapsed={isMobile ? openDrawer : toggleSidebar}
             collapsed={collapsed}
@@ -107,12 +113,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           />
         </AntHeader>
 
-
         {/* Content */}
         <Content
           style={{
             flex: 1,
-            margin: "24px 16px",
             padding: 24,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
