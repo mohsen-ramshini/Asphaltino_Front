@@ -22,17 +22,9 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined,
 } from "@ant-design/icons";
-import Paragraph from "antd/lib/typography/Paragraph";
-import { BsSnow, BsDroplet } from 'react-icons/bs';
+import { BsSnow } from 'react-icons/bs';
 import { MdDeviceUnknown } from 'react-icons/md';
-
-import LineChart from "../components/chart/LineChart";
-import MapComponent from "./map/MapComponent";
-import EChart from "../components/chart/EChart";
-import WeatherComponent from "./weather/WeatherComponent";
 import { useGetDevices } from "@/features/device/api/use-get-devices";
-import { useGetDeviceStatsOverview } from "@/features/dashboard/api/data/use-get-device-stats-overview";
-import { useGetSystemAlerts } from "@/features/dashboard/api/alerts/use-get-system-alerts";
 
 
 const Record = () => {

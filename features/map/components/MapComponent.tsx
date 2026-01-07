@@ -35,6 +35,9 @@ export default function MapComonent() {
     useState<GeoJsonProperties | null>(null);
   const [detailsSidebarOpen, setDetailsSidebarOpen] = useState(false);
   const [selectedDeviceInSidebar, setSelectedDeviceInSidebar] = useState(null);
+  const [selectedDeviceFull, setSelectedDeviceFull] = useState<
+    (typeof mockDeviceData)[0] | null
+  >(null);
 
   // Use mock device data instead of API
   const devices = mockDeviceData;
@@ -477,10 +480,15 @@ export default function MapComonent() {
                       ? "bg-blue-50 border-blue-200 shadow-md"
                       : "bg-white border-gray-200 hover:bg-gray-50"
                   }`}
-                  onClick={() =>
-                    feature.properties &&
-                    handleDeviceSelect(feature.properties.id)
-                  }
+                  onClick={() => {
+                    if (!feature.properties) return;
+                    const fullDevice = devices.find(
+                      (d) =>
+                        (d.uuid || d.id?.toString()) === feature.properties!.id
+                    );
+                    setSelectedDeviceFull(fullDevice || null);
+                    handleDeviceSelect(feature.properties.id);
+                  }}
                 >
                   <div className="flex items-center">
                     <Badge
@@ -528,8 +536,7 @@ export default function MapComonent() {
         }`}
       >
         <DeviceDetailsSidebar
-          deviceId={selectedDevice?.id || selectedDeviceInSidebar}
-          deviceInfo={selectedDevice}
+          deviceInfo={selectedDeviceFull || {}}
           onClose={handleCloseDetailsSidebar}
         />
       </div>

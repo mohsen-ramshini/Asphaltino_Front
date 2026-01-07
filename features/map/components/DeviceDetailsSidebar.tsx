@@ -1,289 +1,245 @@
-import React, { useEffect, useState, forwardRef } from 'react';
-import { Card, Typography, Descriptions, Tag, Statistic, Button as AntdButton, Spin, Progress, Divider } from 'antd';
-import { EditOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
-import { useGetDeviceStatsData } from '@/features/dashboard/api/data/use-get-device-stats-data';
-import { useGetDeviceData } from '@/features/dashboard/api/data/use-get-device-data';
+"use client";
 
-const { Title, Text } = Typography;
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  Typography,
+  Descriptions,
+  Tag,
+  Statistic,
+  Button as AntdButton,
+  Progress,
+  Divider,
+} from "antd";
+import { EditOutlined, SettingOutlined } from "@ant-design/icons";
+
+const { Text } = Typography;
 
 interface DeviceDetailsSidebarProps {
-  deviceId: string;
   deviceInfo: any;
   onClose: () => void;
   scenarioMode?: boolean;
 }
 
 function formatDate(dateString?: string) {
-  if (!dateString) return 'N/A';
+  if (!dateString) return "N/A";
   const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'N/A';
-  return date.toLocaleString('en-US');
+  if (isNaN(date.getTime())) return "N/A";
+  return date.toLocaleString("en-US");
 }
 
-
-
 const DeviceDetailsSidebar: React.FC<DeviceDetailsSidebarProps> = ({
-  deviceId,
   deviceInfo,
   onClose,
   scenarioMode = true,
 }) => {
-  // Scenario state
-  const [step, setStep] = useState(0);
-  const [customData, setCustomData] = useState({
-    AirTemperature: deviceInfo?.airTemp ?? 20,
-    AsphaltTemperature: deviceInfo?.asphaltTemp ?? 20,
-    Icing: deviceInfo?.iceDetected ?? false,
-  });
-
-  const { data: deviceStatsData } = useGetDeviceStatsData(deviceId);
-  const { data: deviceData } = useGetDeviceData(deviceId);
-
-  let finalDeviceData = deviceData;
-  let finalDeviceStats = deviceStatsData;
+  const [currentAsphaltTemp, setCurrentAsphaltTemp] = useState(
+    deviceInfo?.temperature_records?.asphalt_temperature?.[0]?.value_c ?? 0
+  );
+  const [heatingMessage, setHeatingMessage] = useState("");
 
   useEffect(() => {
-    if (!scenarioMode) return;
-    setStep(0);
-    setCustomData({
-      AirTemperature: deviceInfo?.airTemp ?? 20,
-      AsphaltTemperature: deviceInfo?.asphaltTemp ?? 20,
-      Icing: deviceInfo?.iceDetected ?? false,
-    });
+    if (!scenarioMode || !deviceInfo?.temperature_records?.asphalt_temperature)
+      return;
 
-    const t1 = setTimeout(() => {
-      setStep(1);
-      setCustomData({
-        AirTemperature: -5,
-        AsphaltTemperature: 0,
-        Icing: true,
-      });
+    const asphaltTemps = deviceInfo.temperature_records.asphalt_temperature;
+    const heatingStatusDaily = deviceInfo.heating_status_daily;
 
-      const t2 = setTimeout(() => {
-        setStep(2);
+    const updateTemperature = () => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const minutesIntoHour = now.getMinutes();
+      const secondsIntoMinute = now.getSeconds();
 
-        const t3 = setTimeout(() => {
-          setStep(3);
-          setCustomData({
-            AirTemperature: -10,
-            AsphaltTemperature: 1,
-            Icing: false,
-          });
+      const currentTemp =
+        asphaltTemps.find((t: any) => t.hour === currentHour)?.value_c ?? 0;
 
-          const t4 = setTimeout(() => {
-            setStep(4);
+      const heaterStatus = heatingStatusDaily.find(
+        (h: any) => h.hour === currentHour
+      )?.status;
 
-            const t5 = setTimeout(() => {
-              setStep(5);
-              setCustomData({
-                AirTemperature: -10,
-                AsphaltTemperature: 1,
-                Icing: false,
-              });
-            }, 15000);
-            return () => clearTimeout(t5);
-          }, 5000);
-          return () => clearTimeout(t4);
-        }, 5000);
-        return () => clearTimeout(t3);
-      }, 15000);
-      return () => clearTimeout(t2);
-    }, 35000);
+      // هدف دمای ساعت بعد
+      let targetTemp = currentTemp;
 
-    return () => {
-      clearTimeout(t1);
+      if (heaterStatus === "ON") {
+        // اگر heater روشن است → هدف دما صفر
+        targetTemp = 0;
+        setHeatingMessage(
+          `Heating active: ${
+            heatingStatusDaily.find((h: any) => h.hour === currentHour)?.source ||
+            "electric element"
+          }`
+        );
+      } else {
+        // heater OFF → هدف دمای ساعت بعد
+        const nextHour = (currentHour + 1) % 24;
+        targetTemp =
+          asphaltTemps.find((t: any) => t.hour === nextHour)?.value_c ??
+          currentTemp;
+        setHeatingMessage("Heating inactive");
+      }
+
+      const tempDiff = targetTemp - currentAsphaltTemp;
+      if (tempDiff === 0) return;
+
+      const remainingMs =
+        ((59 - minutesIntoHour) * 60 + (60 - secondsIntoMinute)) * 1000;
+
+      const totalSteps = Math.abs(tempDiff * 10); // step 0.1°C
+      const stepInterval = remainingMs / totalSteps;
+      const stepValue = tempDiff > 0 ? 0.1 : -0.1;
+
+      const intervalId = setInterval(() => {
+        setCurrentAsphaltTemp((prev: number) => {
+          const nextValue = +(prev + stepValue).toFixed(1);
+          if (
+            (stepValue > 0 && nextValue >= targetTemp) ||
+            (stepValue < 0 && nextValue <= targetTemp)
+          ) {
+            clearInterval(intervalId);
+            return +targetTemp.toFixed(1);
+          }
+          return nextValue;
+        });
+      }, stepInterval);
+
+      return () => clearInterval(intervalId);
     };
-  }, [deviceId, scenarioMode, deviceInfo]);
 
-  if (scenarioMode && (step === 1 || step === 3 || step === 5)) {
-    finalDeviceData = {
-      ...deviceData,
-      data: [{
-        ...deviceData?.data?.[0],
-        UUID: deviceData?.data?.[0]?.UUID ?? '',
-        DeviceUUID: deviceData?.data?.[0]?.DeviceUUID ?? '',
-        Device: deviceData?.data?.[0]?.Device ?? '',
-        Timestamp: deviceData?.data?.[0]?.Timestamp ?? '',
-        AirTemperature: customData.AirTemperature,
-        AsphaltTemperature: customData.AsphaltTemperature,
-        Icing: customData.Icing,
-        WindSpeed: deviceData?.data?.[0]?.WindSpeed !== undefined ? deviceData.data[0].WindSpeed : null,
-        AirHumidity: deviceData?.data?.[0]?.AirHumidity !== undefined ? deviceData.data[0].AirHumidity : null,
-        BatteryLevel: deviceData?.data?.[0]?.BatteryLevel !== undefined ? deviceData.data[0].BatteryLevel : null,
-        SignalStrength: deviceData?.data?.[0]?.SignalStrength !== undefined ? deviceData.data[0].SignalStrength : null,
-        OtherData: deviceData?.data?.[0]?.OtherData !== undefined ? deviceData.data[0].OtherData : null,
-      }],
-      hasMore: deviceData?.hasMore ?? false,
-      limit: deviceData?.limit ?? 0,
-      offset: deviceData?.offset ?? 0,
-      total: deviceData?.total ?? 0,
-    };
-  }
+    updateTemperature();
+    const intervalHourly = setInterval(updateTemperature, 1000 * 60); // هر دقیقه چک کن
+    return () => clearInterval(intervalHourly);
+  }, [deviceInfo, scenarioMode, currentAsphaltTemp]);
 
-  if (scenarioMode && (step === 2 || step === 4)) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full p-8 bg-gradient-to-br from-gray-50 to-blue-50">
-        <Spin size="large" />
-        <div className="mt-8 text-xl text-blue-700 font-semibold text-center">
-          {step === 2
-            ? 'Relay is activating the heating element...'
-            : 'Software is instructing the relay to activate the water pump...'}
-        </div>
-        <div className="mt-10 flex flex-col gap-2 text-center text-base text-gray-700 bg-white rounded-xl shadow p-6 w-full max-w-xs">
-          <div>
-            <span className="font-semibold">Air Temperature:</span> {customData.AirTemperature}°C
-          </div>
-          <div>
-            <span className="font-semibold">Asphalt Temperature:</span> {customData.AsphaltTemperature}°C
-          </div>
-          <div>
-            <span className="font-semibold">Ice Detected:</span> {customData.Icing ? 'Yes' : 'No'}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const latestAirTemp =
+    deviceInfo?.temperature_records?.air_temperature?.find(
+      (t: any) => t.hour === new Date().getHours()
+    )?.value_c ?? null;
+
+  const icingNow =
+    deviceInfo?.icing_probability_daily?.find(
+      (t: any) => t.hour === new Date().getHours()
+    )?.probability ?? null;
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-white to-blue-50 rounded-l-xl shadow-lg">
+      {/* Header */}
       <div className="flex justify-between items-center p-5 border-b border-gray-200 bg-white rounded-tl-xl">
-        <div className="font-bold text-xl text-blue-900">{deviceInfo?.title || 'Device Details'}</div>
-        <button onClick={onClose} className="text-gray-400 hover:text-blue-600 text-2xl transition-colors">&times;</button>
+        <div className="font-bold text-xl text-blue-900">
+          {deviceInfo?.name || "Device Details"}
+        </div>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-blue-600 text-2xl transition-colors"
+        >
+          &times;
+        </button>
       </div>
+
+      {/* Content */}
       <div className="flex-1 overflow-y-auto px-6 py-4">
+        {/* Device Info */}
         <div className="mb-6 grid grid-cols-2 gap-4">
           <Card className="col-span-2 bg-gradient-to-r from-blue-50 to-white shadow-none">
             <Descriptions size="small" column={1} bordered>
-              <Descriptions.Item label="Device ID">
-                <span className="font-mono text-blue-700">{deviceId}</span>
-              </Descriptions.Item>
+              <Descriptions.Item label="UUID">{deviceInfo?.uuid}</Descriptions.Item>
               <Descriptions.Item label="Location">
-                {deviceInfo?.address || 'Unknown location'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Last Seen">
-                {formatDate(finalDeviceStats?.last_data_received ?? undefined)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Data Points">
-                {finalDeviceStats?.total_data_points || 0}
+                {deviceInfo?.location?.address || "Unknown location"}
               </Descriptions.Item>
               <Descriptions.Item label="Status">
                 <Tag
                   color={
-                    deviceInfo?.status === 'online'
-                      ? 'success'
-                      : deviceInfo?.status === 'maintenance'
-                      ? 'processing'
-                      : deviceInfo?.status === 'warning'
-                      ? 'warning'
-                      : 'error'
+                    deviceInfo?.status === "online"
+                      ? "success"
+                      : deviceInfo?.status === "maintenance"
+                      ? "processing"
+                      : deviceInfo?.status === "warning"
+                      ? "warning"
+                      : "error"
                   }
                 >
-                  {deviceInfo?.status ? deviceInfo.status.charAt(0).toUpperCase() + deviceInfo.status.slice(1) : 'Offline'}
+                  {deviceInfo?.status
+                    ? deviceInfo.status.charAt(0).toUpperCase() +
+                      deviceInfo.status.slice(1)
+                    : "Offline"}
                 </Tag>
               </Descriptions.Item>
             </Descriptions>
           </Card>
         </div>
 
+        {/* Current Readings */}
         <Divider orientation="left" className="text-blue-900 font-semibold">
           Current Readings
         </Divider>
         <div className="grid grid-cols-2 gap-4 mb-6">
-          {finalDeviceData?.data && finalDeviceData.data.length > 0 ? (
-            <>
-              {finalDeviceData.data[0].AirTemperature !== undefined && (
-                <Card className="text-center border border-blue-100 rounded-xl shadow-sm bg-white">
-                  <Statistic 
-                    title="Air Temperature" 
-                    value={finalDeviceData.data[0].AirTemperature?.toFixed(1)} 
-                    suffix="°C"
-                    valueStyle={{ color: '#2563eb' }}
-                  />
-                </Card>
-              )}
-              {finalDeviceData.data[0].AsphaltTemperature !== undefined && (
-                <Card className="text-center border border-yellow-100 rounded-xl shadow-sm bg-white">
-                  <Statistic 
-                    title="Asphalt Temperature" 
-                    value={finalDeviceData.data[0].AsphaltTemperature?.toFixed(1)} 
-                    suffix="°C"
-                    valueStyle={{ color: '#f59e0b' }}
-                  />
-                </Card>
-              )}
-              {finalDeviceData.data[0].AirHumidity !== undefined && (
-                <Card className="text-center border border-green-100 rounded-xl shadow-sm bg-white">
-                  <Statistic 
-                    title="Humidity" 
-                    value={finalDeviceData.data[0].AirHumidity?.toFixed(1)} 
-                    suffix="%"
-                    valueStyle={{ color: '#10b981' }}
-                  />
-                </Card>
-              )}
-              {finalDeviceData.data[0].Icing !== undefined && (
-                <Card className="text-center border border-red-100 rounded-xl shadow-sm bg-white">
-                  <Statistic 
-                    title="Ice Detected" 
-                    value={finalDeviceData.data[0].Icing ? "Yes" : "No"} 
-                    valueStyle={{ color: finalDeviceData.data[0].Icing ? '#ef4444' : '#10b981' }}
-                  />
-                </Card>
-              )}
-            </>
-          ) : (
-            <div className="col-span-2 text-center p-6 bg-gray-50 rounded-xl border border-gray-200">
-              <Text className="text-gray-400">No sensor data available</Text>
+          {latestAirTemp !== null && (
+            <Card className="text-center border border-blue-100 rounded-xl shadow-sm bg-white">
+              <Statistic
+                title="Air Temperature"
+                value={latestAirTemp.toFixed(1)}
+                suffix="°C"
+                valueStyle={{ color: "#2563eb" }}
+              />
+            </Card>
+          )}
+          <Card className="text-center border border-yellow-100 rounded-xl shadow-sm bg-white">
+            <Statistic
+              title="Asphalt Temperature"
+              value={currentAsphaltTemp.toFixed(1)}
+              suffix="°C"
+              valueStyle={{ color: "#f59e0b" }}
+            />
+            <div className="text-center mt-2 text-blue-600 font-semibold">
+              {heatingMessage}
             </div>
+          </Card>
+          {icingNow !== null && (
+            <Card className="text-center border border-red-100 rounded-xl shadow-sm bg-white">
+              <Statistic
+                title="Icing Probability"
+                value={(icingNow * 100).toFixed(0)}
+                suffix="%"
+                valueStyle={{ color: icingNow > 0.5 ? "#ef4444" : "#10b981" }}
+              />
+            </Card>
           )}
         </div>
 
+        {/* Energy Status */}
         <Divider orientation="left" className="text-blue-900 font-semibold">
-          Device Status
+          Energy Status
         </Divider>
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div>
             <div className="flex justify-between mb-1">
               <Text className="text-gray-500">Battery Level</Text>
-              <Text className="text-gray-800 font-medium">{finalDeviceStats?.battery_level?.toFixed(0) || 'N/A'}%</Text>
+              <Text className="text-gray-800 font-medium">
+                {deviceInfo?.energy?.storage?.current_level_percent || 0}%
+              </Text>
             </div>
-            <Progress 
-              percent={finalDeviceStats?.battery_level || 0} 
-              strokeColor={{
-                '0%': '#10b981',
-                '100%': '#3b82f6',
-              }}
+            <Progress
+              percent={deviceInfo?.energy?.storage?.current_level_percent || 0}
+              strokeColor={{ "0%": "#10b981", "100%": "#3b82f6" }}
               size="small"
               showInfo={false}
             />
           </div>
           <div>
             <div className="flex justify-between mb-1">
-              <Text className="text-gray-500">Signal Strength</Text>
-              <Text className="text-gray-800 font-medium">{finalDeviceStats?.signal_strength || 'N/A'}</Text>
+              <Text className="text-gray-500">Solar Max Power</Text>
+              <Text className="text-gray-800 font-medium">
+                {deviceInfo?.energy?.generation
+                  ?.find((g: any) => g.type === "solar")
+                  ?.max_power_w || 0}{" "}
+                W
+              </Text>
             </div>
-            <Progress 
-              percent={
-                finalDeviceStats?.signal_strength === 'Strong' ? 90 :
-                finalDeviceStats?.signal_strength === 'Medium' ? 60 :
-                finalDeviceStats?.signal_strength === 'Weak' ? 30 : 0
-              }
-              strokeColor={{
-                '0%': '#f59e0b',
-                '100%': '#10b981',
-              }}
-              size="small"
-              showInfo={false}
-            />
-          </div>
-          <div className="flex justify-between items-center">
-            <Text className="text-gray-500">Maintenance Needed</Text>
-            <Tag color={finalDeviceStats?.maintenance_needed ? 'error' : 'success'}>
-              {finalDeviceStats?.maintenance_needed ? 'Yes' : 'No'}
-            </Tag>
           </div>
         </div>
       </div>
+
+      {/* Footer */}
       <div className="border-t border-gray-200 p-5 bg-white rounded-bl-xl">
         <div className="flex justify-between">
           <AntdButton
