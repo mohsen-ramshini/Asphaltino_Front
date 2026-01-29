@@ -7,7 +7,6 @@ import {
   Typography,
   Radio,
   Spin,
-  Statistic,
   Select,
   Button,
   Timeline,
@@ -24,13 +23,15 @@ import { Sun, Thermometer, Mountain, Compass, TrendingUp } from "lucide-react";
 // mock data
 import { kpiCards } from "@/lib/constant/kpi-cards";
 import { mockDeviceData } from "@/lib/mockDevice";
+import HourlyProfileChart from "./chart/HourlyProfileChart";
+import MonthlyEnergyChart from "./chart/MonthlyEnergyChart";
 
 const { Title, Text } = Typography;
 
 function Dashboard() {
   const [reverse, setReverse] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(
-    mockDeviceData[0]?.id || null
+    mockDeviceData[0]?.id || null,
   );
   const [selectedDevice, setSelectedDevice] = useState(mockDeviceData[0]);
 
@@ -259,7 +260,7 @@ function Dashboard() {
         </Col>
 
         <Col xs={24} lg={12}>
-          <Card className="rounded-xl border-0 shadow-sm bg-white h-full">
+          <Card className="rounded-xl border-0 shadow-sm bg-white overflow-hidden">
             {selectedDevice && (
               <SunPathLineChart
                 sunAngleData={{
@@ -274,17 +275,139 @@ function Dashboard() {
         </Col>
       </Row>
 
-      {/* CHARTS */}
+      <Row gutter={[24, 24]}>
+        <Col span={24}>
+          <Card
+            className="rounded-xl border-0 shadow-sm bg-white overflow-hidden"
+            style={{ minHeight: 900 }}
+          >
+            <div className="flex flex-col gap-8 w-full">
+              {/* LineChart */}
+              <div className="w-full" style={{ height: 380, minWidth: 0 }}>
+                <LineChart device={normalizedDevice} />
+              </div>
+
+              {/* EChart */}
+              <div className="w-full" style={{ height: 380, minWidth: 0 }}>
+                <EChart deviceData={selectedDevice} />
+              </div>
+            </div>
+          </Card>
+        </Col>
+      </Row>
       <Row gutter={[24, 24]}>
         <Col span={24}>
           <Card className="rounded-xl border-0 shadow-sm bg-white">
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1 min-w-0">
-                <LineChart device={normalizedDevice} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <EChart deviceData={selectedDevice} />
-              </div>
+            <div className="space-y-10">
+              {/* ================= PV SYSTEM INFO ================= */}
+              <section>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  PV System Configuration
+                </h3>
+
+                <div className="grid grid-cols-1 sm toggle grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    {
+                      label: "PV System Type",
+                      value: "Ground-mounted large scale",
+                    },
+                    { label: "Azimuth", value: "180° (South-facing)" },
+                    { label: "Tilt Angle", value: "45°" },
+                    { label: "Installed Capacity", value: "1000 kWp" },
+                  ].map((item, index) => (
+                    <div
+                      key={index}
+                      className="rounded-xl border border-gray-100 bg-gray-50 p-4"
+                    >
+                      <p className="text-xs text-gray-500">{item.label}</p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* ================= ANNUAL AVERAGE ================= */}
+              <section>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  Annual Average Performance
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Total photovoltaic power output and global tilted irradiation
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-6">
+                    <p className="text-sm text-gray-600 mb-1">
+                      Annual Energy Output
+                    </p>
+                    <p className="text-3xl font-bold text-blue-700">
+                      1.405
+                      <span className="text-base font-medium ml-1">
+                        GWh / year
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 p-6">
+                    <p className="text-sm text-gray-600 mb-1">
+                      Global Tilted Irradiation
+                    </p>
+                    <p className="text-3xl font-bold text-amber-700">
+                      1756
+                      <span className="text-base font-medium ml-1">
+                        kWh/m² / year
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* ================= MONTHLY AVERAGE ================= */}
+              <section>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Monthly Average Energy Production
+                </h3>
+
+                <div className="h-[320px] min-w-0 overflow-hidden">
+                  <MonthlyEnergyChart />
+                </div>
+              </section>
+
+              {/* ================= HOURLY PROFILES ================= */}
+              <section>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Average Hourly Profiles
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Average hourly photovoltaic power output for each month
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {[
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                  ].map((month) => (
+                    <div
+                      className="h-[200px] min-w-0 overflow-hidden"
+                      key={month}
+                    >
+                      <HourlyProfileChart month={month} />
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           </Card>
         </Col>

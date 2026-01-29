@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Typography, Skeleton } from "antd";
 
 interface Device {
@@ -25,7 +25,7 @@ interface Device {
   };
   temperature_asphalt?: { hour: number; value: number }[];
   temperature_air?: { hour: number; value: number }[];
-  [key: string]: any; // بقیه فیلدها
+  [key: string]: any;
 }
 
 interface LineChartProps {
@@ -36,12 +36,33 @@ const LineChart: React.FC<LineChartProps> = ({ device }) => {
   const { Title, Paragraph } = Typography;
   const [ReactApexChartComponent, setReactApexChartComponent] =
     useState<any>(null);
+  const chartRef = useRef<any>(null);
 
+  // Lazy load ApexCharts
   useEffect(() => {
     import("react-apexcharts").then((mod) =>
       setReactApexChartComponent(() => mod.default)
     );
   }, []);
+
+  // Safe resize after mount or device change
+  useEffect(() => {
+    const resizeChart = () => {
+      if (
+        chartRef.current &&
+        chartRef.current.chart &&
+        chartRef.current.chart.resize
+      ) {
+        chartRef.current.chart.resize();
+      }
+    };
+
+    if (ReactApexChartComponent) {
+      // requestAnimationFrame ensures DOM is ready
+      const rafId = window.requestAnimationFrame(resizeChart);
+      return () => window.cancelAnimationFrame(rafId);
+    }
+  }, [ReactApexChartComponent, device]);
 
   if (!ReactApexChartComponent) {
     return <Skeleton active paragraph={{ rows: 6 }} />;
@@ -67,17 +88,31 @@ const LineChart: React.FC<LineChartProps> = ({ device }) => {
   ];
 
   const options = {
-    chart: { type: "area", toolbar: { show: true }, zoom: { enabled: true } },
+    chart: {
+      type: "area",
+      toolbar: { show: true },
+      zoom: { enabled: true },
+    },
     dataLabels: { enabled: false },
     stroke: { curve: "smooth" },
-    xaxis: { type: "category", title: { text: "Hour" } },
+    xaxis: {
+      type: "numeric",
+      min: 0,
+      max: 23,
+      tickAmount: 24,
+      title: { text: "Hour" },
+    },
     yaxis: { title: { text: "Temperature (°C)" } },
-    tooltip: { shared: true, intersect: false },
+    tooltip: {
+      shared: true,
+      intersect: false,
+      x: { formatter: (val: number) => `${val}:00` },
+    },
     colors: ["#f59e0b", "#3b82f6"],
   };
 
   return (
-    <>
+    <div className="w-full overflow-hidden">
       <div className="linechart mb-4">
         <div>
           <Title level={5}>Temperature Monitoring</Title>
@@ -97,7 +132,7 @@ const LineChart: React.FC<LineChartProps> = ({ device }) => {
         height={350}
         width="100%"
       />
-    </>
+    </div>
   );
 };
 

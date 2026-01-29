@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Row, Col, Typography, Skeleton } from "antd";
 
 const { Title, Paragraph } = Typography;
@@ -19,20 +19,32 @@ interface EChartProps {
 }
 
 const EChart: React.FC<EChartProps> = ({ deviceData }) => {
+  const chartRef = useRef<any>(null);
   const [ReactApexChart, setReactApexChart] = useState<any>(null);
 
+  // Lazy load ApexCharts
   useEffect(() => {
-    import("react-apexcharts").then((mod) => {
-      setReactApexChart(() => mod.default);
-    });
+    import("react-apexcharts").then((mod) =>
+      setReactApexChart(() => mod.default)
+    );
   }, []);
 
+  // Safe resize after mount or deviceData change
+  useEffect(() => {
+    if (!ReactApexChart) return;
+
+    const resizeChart = () => {
+      if (chartRef.current?.chart?.resize) {
+        chartRef.current.chart.resize();
+      }
+    };
+
+    const rafId = requestAnimationFrame(resizeChart);
+    return () => cancelAnimationFrame(rafId);
+  }, [ReactApexChart, deviceData]);
+
   if (!ReactApexChart) {
-    return (
-      <Skeleton.Node active style={{ width: "100%", height: 260 }}>
-        <div className="h-[260px] bg-gray-50 rounded-lg" />
-      </Skeleton.Node>
-    );
+    return <Skeleton active paragraph={{ rows: 6 }} />;
   }
 
   // ---------- DATA ----------
@@ -44,49 +56,36 @@ const EChart: React.FC<EChartProps> = ({ deviceData }) => {
   const hours =
     deviceData?.icing_probability_daily?.map((d) => `${d.hour}:00`) || [];
 
-  const max = Math.max(...probabilities);
+  const max = Math.max(...probabilities, 0);
   const avg =
     probabilities.reduce((a, b) => a + b, 0) / (probabilities.length || 1);
   const current = probabilities[0] ?? 0;
 
   // ---------- CHART ----------
-  const series = [
-    {
-      name: "Icing Probability (%)",
-      data: probabilities,
-    },
-  ];
+  const series = [{ name: "Icing Probability (%)", data: probabilities }];
 
   const options = {
     chart: {
       type: "bar",
       toolbar: { show: false },
+      parentHeightOffset: 0, // مهم برای جلوگیری از overflow
     },
     plotOptions: {
-      bar: {
-        borderRadius: 6,
-        columnWidth: "55%",
-      },
+      bar: { borderRadius: 6, columnWidth: "55%" },
     },
     dataLabels: { enabled: false },
-    xaxis: {
-      categories: hours,
-      title: { text: "Hour of Day" },
-    },
-    yaxis: {
-      max: 100,
-      title: { text: "Probability (%)" },
-    },
-    tooltip: {
-      y: {
-        formatter: (val: number) => `${val}%`,
-      },
-    },
+    xaxis: { categories: hours, title: { text: "Hour of Day" } },
+    yaxis: { max: 100, title: { text: "Probability (%)" } },
+    tooltip: { y: { formatter: (val: number) => `${val}%` } },
     colors: ["#f59e0b"],
+    grid: { padding: { left: 10, right: 10 } },
   };
 
   return (
-    <section className="h-full flex flex-col justify-between">
+    <section
+      className="h-full flex flex-col justify-between w-full overflow-hidden"
+      style={{ minWidth: 0 }}
+    >
       {/* CHART */}
       <div>
         <ReactApexChart
@@ -94,6 +93,7 @@ const EChart: React.FC<EChartProps> = ({ deviceData }) => {
           series={series}
           type="bar"
           height={220}
+          width="100%"
         />
       </div>
 

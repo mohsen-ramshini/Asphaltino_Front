@@ -55,15 +55,15 @@ function Header({ name, toggleCollapsed, collapsed, isDarkMode = false }: Header
 
       <Col className="flex items-center gap-4">
         <Tooltip title="Notifications">
-          <Button type="text" icon={<BellOutlined />} className="text-xl" />
+          <Button type="text" icon={<BellOutlined />} className="text-xl" disabled/>
         </Tooltip>
 
         <Tooltip title="Language">
-          <Button type="text" icon={<GlobalOutlined />} className="text-xl" />
+          <Button type="text" icon={<GlobalOutlined />} className="text-xl" disabled/>
         </Tooltip>
 
         <Tooltip title="Theme">
-          <Button type="text" icon={isDarkMode ? <MoonOutlined /> : <BulbOutlined />} className="text-xl" />
+          <Button type="text" icon={isDarkMode ? <MoonOutlined /> : <BulbOutlined />} className="text-xl" disabled/>
         </Tooltip>
       </Col>
     </Row>

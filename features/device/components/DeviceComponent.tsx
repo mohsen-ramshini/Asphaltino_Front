@@ -48,121 +48,6 @@ const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
-// Mock data for device table
-// const mockDeviceData = [
-//   {
-//     id: 1,
-//     name: "asphalt sensors",
-//     uuid: "abc123-xyz-789",
-//     location: {
-//       address: "Tehran Province, Tehran, District 4, 5th Golestan St, QF8J+674, Iran",
-//       latitude: 35.7501,
-//       longitude: 51.5255,
-//     },
-//     api_key: "APIKEY123456789",
-//     sub_id: "SUB-001",
-//     status: 'online',
-//     count: 120,
-//     avg_wind_speed: 5.2,
-//     max_wind_speed: 12.1,
-//     min_wind_speed: 1.0,
-//     avg_humidity: 45.3,
-//     avg_air_temperature: 22.5,
-//     avg_asphalt_temperature: 28.1,
-//     icing_occurrences: 0,
-//     first_data_timestamp: "2024-05-01T08:00:00Z",
-//     last_data_timestamp: "2024-06-01T12:30:00Z",
-//   },
-//   {
-//     id: 2,
-//     name: "Ice Detector Beta",
-//     uuid: "def456-uvw-012",
-//     location: {
-//       address: "456 Highway A1, Isfahan",
-//       latitude: 32.6539,
-//       longitude: 51.6660,
-//     },
-//     api_key: "APIKEY987654321",
-//     sub_id: "SUB-002",
-//     count: 98,
-//     avg_wind_speed: 3.8,
-//     max_wind_speed: 8.5,
-//     min_wind_speed: 0.5,
-//     avg_humidity: 60.1,
-//     avg_air_temperature: -2.3,
-//     avg_asphalt_temperature: -1.0,
-//     icing_occurrences: 3,
-//     first_data_timestamp: "2024-05-10T09:15:00Z",
-//     last_data_timestamp: "2024-06-01T11:00:00Z",
-//   },
-//   {
-//     id: 3,
-//     name: "Temperature Sensor Gamma",
-//     uuid: "ghi789-rst-345",
-//     location: {
-//       address: "789 North Ave, Shiraz",
-//       latitude: 29.5918,
-//       longitude: 52.5837,
-//     },
-//     api_key: "APIKEY456789123",
-//     sub_id: "SUB-003",
-//     count: 150,
-//     avg_wind_speed: 2.1,
-//     max_wind_speed: 5.0,
-//     min_wind_speed: 0.2,
-//     avg_humidity: 30.0,
-//     avg_air_temperature: 35.7,
-//     avg_asphalt_temperature: 42.3,
-//     icing_occurrences: 0,
-//     first_data_timestamp: "2024-05-05T07:45:00Z",
-//     last_data_timestamp: "2024-06-01T13:10:00Z",
-//   },
-//   {
-//     id: 4,
-//     name: "Multi-Sensor Delta",
-//     uuid: "jkl012-mno-678",
-//     location: {
-//       address: "321 East Road, Mashhad",
-//       latitude: 36.2605,
-//       longitude: 59.6168,
-//     },
-//     api_key: "APIKEY111222333",
-//     sub_id: "SUB-004",
-//     count: 75,
-//     avg_wind_speed: 7.3,
-//     max_wind_speed: 15.2,
-//     min_wind_speed: 2.1,
-//     avg_humidity: 55.8,
-//     avg_air_temperature: 18.9,
-//     avg_asphalt_temperature: 25.4,
-//     icing_occurrences: 1,
-//     first_data_timestamp: "2024-05-15T06:30:00Z",
-//     last_data_timestamp: "2024-06-01T14:45:00Z",
-//   },
-//   {
-//     id: 5,
-//     name: "Road Monitor Epsilon",
-//     uuid: "pqr345-stu-901",
-//     location: {
-//       address: "654 South Bridge, Tabriz",
-//       latitude: 38.0962,
-//       longitude: 46.2738,
-//     },
-//     api_key: "APIKEY444555666",
-//     sub_id: "SUB-005",
-//     count: 200,
-//     avg_wind_speed: 4.5,
-//     max_wind_speed: 9.8,
-//     min_wind_speed: 0.8,
-//     avg_humidity: 40.2,
-//     avg_air_temperature: 12.1,
-//     avg_asphalt_temperature: 16.7,
-//     icing_occurrences: 2,
-//     first_data_timestamp: "2024-04-20T05:00:00Z",
-//     last_data_timestamp: "2024-06-01T15:20:00Z",
-//   },
-// ];
-
 const DeviceComponent = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
@@ -174,8 +59,48 @@ const DeviceComponent = () => {
   // Get the deleteDevice mutation from the hook
   const deleteDevice = useDeleteDevice();
 
+  const average = (arr?: { value_c: number }[]) => {
+    if (!arr || arr.length === 0) return undefined;
+    return arr.reduce((sum, item) => sum + item.value_c, 0) / arr.length;
+  };
+
+  const normalizeDeviceData = (devices: any[]) => {
+    return devices.map((device) => {
+      const airTemps = device.temperature_records?.air_temperature;
+      const asphaltTemps = device.temperature_records?.asphalt_temperature;
+
+      return {
+        ...device,
+
+        // ✅ Data Metrics
+        count: airTemps?.length || asphaltTemps?.length || 0,
+
+        // ✅ Temperature
+        avg_air_temperature: average(airTemps),
+        avg_asphalt_temperature: average(asphaltTemps),
+
+        // ✅ Wind (mock نداریم → safe default)
+        avg_wind_speed: undefined,
+        max_wind_speed: undefined,
+        min_wind_speed: undefined,
+
+        // ✅ Environmental
+        avg_humidity: 35,
+
+        icing_occurrences:
+          device.icing_probability_daily?.filter(
+            (i: any) => i.probability > 0.9,
+          ).length || 0,
+
+        // ✅ API Key (fake for UI)
+        api_key: device.api_key || "sadasdsadqwfwrgwflfl-123456",
+      };
+    });
+  };
+
   // Replace API call with mock data
-  const deviceData = mockDeviceData;
+  const deviceData = normalizeDeviceData(mockDeviceData);
+
   const isLoading = false;
   const error = null;
 
@@ -320,37 +245,6 @@ const DeviceComponent = () => {
     {
       title: (
         <div className="font-semibold text-gray-700 uppercase tracking-wide text-xs">
-          Wind Data
-        </div>
-      ),
-      key: "wind_data",
-      width: 180,
-      render: (record: any) => (
-        <div className="py-2 space-y-2">
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-500">Avg:</span>
-            <span className="font-medium text-cyan-600">
-              {record.avg_wind_speed?.toFixed(1) || "-"} m/s
-            </span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-500">Max:</span>
-            <span className="font-medium text-red-500">
-              {record.max_wind_speed?.toFixed(1) || "-"} m/s
-            </span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-500">Min:</span>
-            <span className="font-medium text-green-500">
-              {record.min_wind_speed?.toFixed(1) || "-"} m/s
-            </span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: (
-        <div className="font-semibold text-gray-700 uppercase tracking-wide text-xs">
           Temperature Data
         </div>
       ),
@@ -365,8 +259,8 @@ const DeviceComponent = () => {
                 record.avg_air_temperature > 30
                   ? "text-red-600"
                   : record.avg_air_temperature < 0
-                  ? "text-blue-600"
-                  : "text-green-600"
+                    ? "text-blue-600"
+                    : "text-green-600"
               }`}
             >
               {record.avg_air_temperature?.toFixed(1) || "-"}°C
@@ -566,7 +460,7 @@ const DeviceComponent = () => {
       message.error(
         `Failed to delete device: ${
           error.response?.data?.message || error.message
-        }`
+        }`,
       );
     } finally {
       setDeletingDeviceId(null);

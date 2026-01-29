@@ -1,13 +1,7 @@
 "use client";
 
-import { Card, Col, Row, Typography, Spin } from "antd";
-import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
-
-import { kpiCards } from "@/lib/constant/kpi-cards";
-import DeviceComponent from "@/features/device/components/DeviceComponent";
+import { Col, Row, Spin } from "antd";
 import MapComonent from "./components/MapComponent";
-
-const { Title, Text } = Typography;
 
 function Map() {
   const isLoading = false;
