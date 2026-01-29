@@ -24,7 +24,7 @@ mapboxgl.accessToken =
 
 // Mock device data - same as in DeviceComponent
 
-export default function MapWithSidebar() {
+export default function MapComonent() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -35,6 +35,9 @@ export default function MapWithSidebar() {
     useState<GeoJsonProperties | null>(null);
   const [detailsSidebarOpen, setDetailsSidebarOpen] = useState(false);
   const [selectedDeviceInSidebar, setSelectedDeviceInSidebar] = useState(null);
+  const [selectedDeviceFull, setSelectedDeviceFull] = useState<
+    (typeof mockDeviceData)[0] | null
+  >(null);
 
   // Use mock device data instead of API
   const devices = mockDeviceData;
@@ -61,8 +64,8 @@ export default function MapWithSidebar() {
         geometry: {
           type: "Point",
           coordinates: [
-            device.location?.longitude || 48.42444,
-            device.location?.latitude || 38.32639,
+            device.location?.longitude || 48.2964,
+            device.location?.latitude || 38.2498,
           ],
         },
       })) as Feature<Point, GeoJsonProperties>[],
@@ -76,7 +79,7 @@ export default function MapWithSidebar() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [48.42444, 38.32639],
+      center: [48.2964, 38.2498], // Tehran, Iran
       zoom: 12,
       pitch: 60,
       bearing: -20,
@@ -85,6 +88,64 @@ export default function MapWithSidebar() {
 
     map.current.on("load", () => {
       setMapLoaded(true);
+
+      const style = map.current!.getStyle();
+      if (!style.layers) return;
+
+      style.layers.forEach((layer) => {
+        if (layer.type !== "symbol") return;
+
+        // 1️⃣ فقط لیبل‌های مکانی
+        if (
+          layer.id.includes("place") ||
+          layer.id.includes("settlement") ||
+          layer.id.includes("poi")
+        ) {
+          // 2️⃣ فقط name_en
+          map.current!.setLayoutProperty(layer.id, "text-field", [
+            "get",
+            "name_en",
+          ]);
+
+          // 3️⃣ فقط featureهایی که name_en دارن
+          map.current!.setFilter(layer.id, ["has", "name_en"]);
+
+          // 4️⃣ فونت امن انگلیسی
+          map.current!.setLayoutProperty(layer.id, "text-font", [
+            "Open Sans Regular",
+            "Arial Unicode MS Regular",
+          ]);
+        }
+      });
+      // 🚫 حذف label خیابون‌های فرعی
+      // 🚫 کنترل زبان + حذف label خیابون‌های فرعی
+      const layers = map.current!.getStyle().layers;
+
+      if (layers) {
+        layers.forEach((layer) => {
+          if (layer.type === "symbol" && layer.id.includes("road-label")) {
+            // ✅ فقط نام انگلیسی خیابون‌ها
+            map.current!.setLayoutProperty(layer.id, "text-field", [
+              "get",
+              "name_en",
+            ]);
+
+            // ❌ حذف خیابون‌های فرعی
+            map.current!.setFilter(layer.id, [
+              "all",
+              ["has", "name_en"],
+              ["!=", ["get", "class"], "street"],
+              ["!=", ["get", "class"], "street_limited"],
+            ]);
+
+            // ✅ فونت امن انگلیسی
+            map.current!.setLayoutProperty(layer.id, "text-font", [
+              "Open Sans Regular",
+              "Arial Unicode MS Regular",
+            ]);
+          }
+        });
+      }
 
       // Hide POI and Transit layers
       if (map.current) {
@@ -134,7 +195,10 @@ export default function MapWithSidebar() {
     });
 
     return () => {
-      if (map.current) map.current.remove();
+      if (map.current) {
+        map.current.remove();
+        map.current = null; // 👈 خیلی مهم
+      }
       if (animationRef.current !== null) {
         if (animationRef.current !== null) {
           cancelAnimationFrame(animationRef.current);
@@ -266,7 +330,7 @@ export default function MapWithSidebar() {
 
     const selectedFeature = geojsonData.features.find(
       (feature) =>
-        feature.properties && feature.properties.id === selectedDeviceInSidebar
+        feature.properties && feature.properties.id === selectedDeviceInSidebar,
     );
 
     if (selectedFeature) {
@@ -287,7 +351,7 @@ export default function MapWithSidebar() {
   };
 
   const flyToLocation = (
-    feature: Feature<Point, GeoJsonProperties> | GeoJSONFeature
+    feature: Feature<Point, GeoJsonProperties> | GeoJSONFeature,
   ) => {
     if (!map.current || !mapLoaded) return;
 
@@ -299,10 +363,10 @@ export default function MapWithSidebar() {
     let coords: [number, number];
     if (feature.geometry.type === "Point") {
       const rawCoords = (feature.geometry as Point).coordinates;
-      coords = [rawCoords[0] ?? 38.32639, rawCoords[1] ?? 48.42444];
+      coords = [rawCoords[0] ?? 51.389, rawCoords[1] ?? 35.6892];
     } else {
       // Fallback to Tehran coordinates if not a Point
-      coords = [38.32639, 48.42444];
+      coords = [51.389, 35.6892];
     }
     const title = feature.properties?.title ?? "";
 
@@ -326,7 +390,7 @@ export default function MapWithSidebar() {
             feature.properties?.address || "No address"
           }</p>
         </div>
-      `
+      `,
       )
       .addTo(map.current);
 
@@ -387,7 +451,7 @@ export default function MapWithSidebar() {
     if (!geojsonData) return;
 
     const selectedFeature = geojsonData.features.find(
-      (feature) => feature.properties && feature.properties.id === deviceId
+      (feature) => feature.properties && feature.properties.id === deviceId,
     );
 
     if (selectedFeature) {
@@ -445,8 +509,8 @@ export default function MapWithSidebar() {
             {isLoadingDevices
               ? "Loading devices..."
               : devices?.length
-              ? `${devices.length} devices found`
-              : "No devices available"}
+                ? `${devices.length} devices found`
+                : "No devices available"}
           </p>
         </div>
 
@@ -474,10 +538,15 @@ export default function MapWithSidebar() {
                       ? "bg-blue-50 border-blue-200 shadow-md"
                       : "bg-white border-gray-200 hover:bg-gray-50"
                   }`}
-                  onClick={() =>
-                    feature.properties &&
-                    handleDeviceSelect(feature.properties.id)
-                  }
+                  onClick={() => {
+                    if (!feature.properties) return;
+                    const fullDevice = devices.find(
+                      (d) =>
+                        (d.uuid || d.id?.toString()) === feature.properties!.id,
+                    );
+                    setSelectedDeviceFull(fullDevice || null);
+                    handleDeviceSelect(feature.properties.id);
+                  }}
                 >
                   <div className="flex items-center">
                     <Badge
@@ -525,8 +594,7 @@ export default function MapWithSidebar() {
         }`}
       >
         <DeviceDetailsSidebar
-          deviceId={selectedDevice?.id || selectedDeviceInSidebar}
-          deviceInfo={selectedDevice}
+          deviceInfo={selectedDeviceFull || {}}
           onClose={handleCloseDetailsSidebar}
         />
       </div>

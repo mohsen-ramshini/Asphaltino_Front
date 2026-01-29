@@ -31,13 +31,13 @@ body {
 }
 
 /* Essential Ant Design overrides using Tailwind utilities */
-.ant-layout-sider {
+/* .ant-layout-sider {
   @apply flex-none;
 }
 
 .ant-layout-sider-zero-width-trigger {
   @apply hidden;
-}
+} */
 
 .ant-header-fixed {
   @apply fixed top-0 right-0 z-50 shadow-lg bg-gray-50;
@@ -83,12 +83,12 @@ body {
 }
 
 /* Drawer specific styles */
-.drawer-sidebar .ant-drawer-body {
+/* .drawer-sidebar .ant-drawer-body {
   @apply p-0;
-}
+} */
 
 /* Responsive adjustments */
-@media (max-width: 991px) {
+/* @media (max-width: 991px) {
   .main-layout {
     margin-left: 0 !important;
   }
@@ -101,7 +101,7 @@ body {
   .sider-primary {
     display: none !important;
   }
-}
+} */
 
 /* Header control styling */
 .header-control {
@@ -109,15 +109,15 @@ body {
 }
 
 /* Mobile menu button - only show on mobile */
-.sidebar-toggler {
+/* .sidebar-toggler {
   @apply block lg:hidden;
-}
+} */
 
 /* Hide search input on very small screens */
-.header-search {
+/* .header-search {
   @apply bg-gray-50 border-gray-200 rounded-lg hidden sm:block;
   width: 200px;
-}
+} */
 
 .btn-sign-in {
   @apply flex items-center gap-2 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-gray-50;
@@ -134,16 +134,16 @@ body {
 
 
 /* Enhanced Sidebar Styling */
-.sider-primary {
+/* .sider-primary {
   @apply bg-white shadow-lg border-r border-gray-200;
 }
 
 .sider-primary .ant-menu {
   @apply bg-transparent border-none;
   padding: 12px;
-}
+} */
 
-.sider-primary .ant-menu-item {
+/* .sider-primary .ant-menu-item {
   @apply mb-1 rounded-xl transition-all duration-300 bg-transparent;
   margin: 0 !important;
   width: 100% !important;
@@ -158,8 +158,8 @@ body {
   @apply bg-blue-50 border-blue-100;
   color: #1890ff !important;
   transform: translateX(4px);
-}
-
+} */
+/* 
 .sider-primary .ant-menu-item-selected {
   @apply bg-gradient-to-r from-blue-500 to-blue-600 border-blue-500 shadow-md;
   color: white !important;
@@ -173,7 +173,7 @@ body {
 
 .sider-primary .ant-menu-item .ant-menu-title-content {
   @apply ml-3 font-medium;
-}
+} */
 
 /* Brand styling */
 .brand {
@@ -195,7 +195,7 @@ body {
 }
 
 /* Active menu item styling */
-.sider-primary .ant-menu-item-selected .icon {
+/* .sider-primary .ant-menu-item-selected .icon {
   @apply bg-white/20 shadow-none;
   color: white !important;
 }
@@ -206,7 +206,7 @@ body {
 }
 
 /* Menu item text styling */
-.sider-primary .ant-menu-item a {
+/* .sider-primary .ant-menu-item a {
   @apply text-gray-700 no-underline transition-colors duration-300 font-medium;
 }
 
@@ -219,21 +219,21 @@ body {
 }
 
 /* Remove default Ant Design styles */
-.sider-primary .ant-menu-light .ant-menu-item-selected {
+/* .sider-primary .ant-menu-light .ant-menu-item-selected {
   background-color: transparent !important;
 }
 
 .sider-primary .ant-menu-light .ant-menu-item:hover {
   color: inherit !important;
   background-color: transparent !important;
-}
+} 
 
 .sider-primary .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
   background-color: transparent !important;
-}
+}  */
 
 /* Add subtle animation for menu items */
-.sider-primary .ant-menu-item {
+/* .sider-primary .ant-menu-item {
   position: relative;
   overflow: hidden;
 }
@@ -251,7 +251,7 @@ body {
 
 .sider-primary .ant-menu-item:hover::before {
   left: 100%;
-}
+} */
 
 /* Create Device Modal Styling */
 .create-device-modal .ant-modal-header {

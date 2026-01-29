@@ -11,7 +11,7 @@ const SignUp = () => {
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       {/* Header */}
       <h5 className="text-base font-semibold z-10 absolute w-full flex items-center justify-between top-6 text-white px-10 py-5">
-        ASPHALTINO
+        IntAsphalt
       </h5>
 
       {/* Video + Form */}
